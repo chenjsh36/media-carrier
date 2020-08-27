@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+  <head>
+    <title>起步</title>
+  </head>
+  <body>
+    <div class="root">
+      <div class="cut-video">
+        <div>
+          <input id="cut-video-input" type="file" onChange="handleFileChange()"/>
+        </div>
+        <span>原始视频: </span>
+        <video style="width: 640px" id="cut-video-before-show" controls src=""></video>
+        <h3>视频剪辑：</h3>
+        <div>
+          <input type="text" id="cut-video-start-input" placeholder="开始时间"/>
+          <input type="text" id="cut-video-end-input" placeholder="结束时间"/>
+        </div>
+        <button onClick="cutVideo()"> 点击剪辑</button>
+        <span id="cut-video-doing-text">处理中，请稍后...</span>
+        <div id="cut-video-after-show"></div>  
+      </div>
+    </div>
+    <script src="./index.js"></script>
+  </body>
+</html>
