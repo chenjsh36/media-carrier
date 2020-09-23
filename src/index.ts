@@ -13,7 +13,7 @@ import * as DataTransform from './utils/dataTransform';
 
 export const Utils = DataTransform;
 
-export interface IOutput {
+interface IOutput {
   md5?: string;
   arrayBuffer?: ArrayBuffer;
   blob?: Blob;
