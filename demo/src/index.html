@@ -16,9 +16,16 @@
           <input type="text" id="cut-video-start-input" placeholder="开始时间"/>
           <input type="text" id="cut-video-end-input" placeholder="结束时间"/>
         </div>
-        <button onClick="cutVideo()"> 点击剪辑</button>
-        <span id="cut-video-doing-text">处理中，请稍后...</span>
-        <div id="cut-video-after-show"></div>  
+        <div>
+          <button onClick="cutVideo()"> 点击剪辑</button>
+          <span id="cut-video-doing-text">处理中，请稍后...</span>
+          <div id="cut-video-after-show"></div>  
+        </div>
+        <div>
+          <button onClick="calcVideoMD5()">计算 MD5</button>
+          <span id="calc-md5-doing-text">处理中，请稍后...</span>
+        </div>
+
       </div>
     </div>
     <script src="./index.js"></script>

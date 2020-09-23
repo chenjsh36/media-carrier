@@ -157,7 +157,10 @@ export function pmToPromise(
     };
     worker.addEventListener('message', successHandler);
     worker.addEventListener('error', failHandler);
-    postInfo && worker.postMessage(postInfo);
+    // console.log('post message:', postInfo);
+    postInfo && worker.postMessage(postInfo, [postInfo.MEMFS[0].data]);
+
+    // postInfo && worker.postMessage(postInfo);
   });
 }
 

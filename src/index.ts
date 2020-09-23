@@ -77,7 +77,7 @@ export default class MediaCarrier {
   }
 
   public withoutPresetClip = async ( originBlob: Blob, conf: { startTime: string, endTime: string, mediaType: string, formatType: string, width: number }): Promise<IOutput> => {
-    const arrayBuffer = await DataTransform.blob2ArrayBuffer(originBlob);
+    let arrayBuffer = await DataTransform.blob2ArrayBuffer(originBlob);
     const { startTime, endTime, mediaType, formatType, width = 640 } = conf;
     const command = {
       type: 'run',
@@ -108,7 +108,8 @@ export default class MediaCarrier {
       arguments: `-ss ${startTime} -t ${endTime} -y -hide_banner -loglevel debug -accurate_seek -i ./input.${formatType} -c:v libx264 -preset ultrafast -filter:v scale=${width}:-1 -crf 23 -maxrate 1024K -bufsize 1536K -movflags +faststart -tune zerolatency -f mp4 ./output`.split(' '),
       MEMFS: [
         {
-          data: new Uint8Array(arrayBuffer as any),
+          // data: new Uint8Array(arrayBuffer as any),
+          data: arrayBuffer as any,
           name: `input.${formatType}`,
         },
       ],
