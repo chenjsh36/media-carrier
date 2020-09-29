@@ -20,6 +20,7 @@ export interface IProgressCallback {
 }
 
 export function createWorker(path: string) {
+  console.log('worker:', path);
   const worker = new Worker(path);
   return worker;
 }

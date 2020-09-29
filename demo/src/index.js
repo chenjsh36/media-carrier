@@ -54,7 +54,7 @@ window.cutVideo = async () =>  {
   const end = endInput.value || '10';
   const beginTime = Date.now();
   console.log('blob:', blob);
-  const { blob: clippedBlob, logs, arrayBuffer: clippedArrayBuffer } = await mc.mediaSpaceClip(blob, {
+  const { blob: clippedBlob, logs, arrayBuffer: clippedArrayBuffer } = await mc.clip(blob, {
     startTime: start,
     endTime: end,
     mediaType: 'video',

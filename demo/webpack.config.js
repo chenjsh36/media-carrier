@@ -30,5 +30,8 @@ module.exports = {
     host: '0.0.0.0',
     compress: true,
     port: 9000,
+    allowedHosts: [
+      'localhost:4200'
+    ]
   },
 };

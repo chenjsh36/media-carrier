@@ -1,10 +1,16 @@
 {
   "name": "media-carrier",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "",
+  "files": [
+    "src",
+    "dist",
+    "lib"
+  ],
   "main": "dist/index.js",
   "module": "lib/index.js",
   "typings": "lib/index.d.ts",
+  "types": "lib/index.d.ts",
   "dependencies": {
     "axios": "^0.20.0"
   },
@@ -27,7 +33,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack --progress --colors --config webpack.config.js",
     "dev": "webpack --config webpack.dev.config.js --watch",
-    "compile": "tsc -p tsconfig.json"
+    "compile": "tsc -p tsconfig.json -w"
   },
   "keywords": [],
   "author": "",

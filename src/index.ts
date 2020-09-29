@@ -45,8 +45,9 @@ export default class MediaCarrier {
       return;
     }
     const { workerPath, onSuccess, onFail } = conf;
-
+    console.log('to create worker:', workerPath);
     const worker = createWorker(workerPath);
+    console.log('worker:', worker);
     const p1 = waitForWorkerIsReady(worker, onSuccess, onFail);
     const p2 = createTimeoutPromise(DEFAULT_TIMEOUT);
     this.worker = worker;
@@ -67,6 +68,8 @@ export default class MediaCarrier {
       endTime,
       formatType ,
     })
+
+    console.log('clip Common:', command);
     const result = await pmToPromise(this.worker, command, `${this.id}`);
 
     return {

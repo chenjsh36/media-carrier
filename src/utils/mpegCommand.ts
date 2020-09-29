@@ -20,7 +20,8 @@ export function getClipCommand({ arrayBuffer, startTime, endTime, formatType }: 
     arguments: `-ss ${startTime} -t ${endTime} -accurate_seek -i input.${formatType} -c copy -avoid_negative_ts 1 output.${formatType}`.split(' '),
     MEMFS: [
       {
-        data: new Uint8Array(arrayBuffer as any),
+        // data: new Uint8Array(arrayBuffer as any),
+        data: arrayBuffer as any,
         name: `input.${formatType}`,
       },
     ],
