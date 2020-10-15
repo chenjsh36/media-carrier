@@ -1,6 +1,6 @@
 {
   "name": "media-carrier",
-  "version": "0.0.3",
+  "version": "1.0.0",
   "description": "",
   "files": [
     "src",
@@ -42,7 +42,8 @@
     "dev": "webpack --config webpack.dev.config.js --watch",
     "compile:watch": "tsc -p tsconfig.json -w",
     "compile": "tsc -p tsconfig.json",
-    "build": "webpack --progress --colors --config webpack.config.js"
+    "build": "webpack --progress --colors --config webpack.config.js",
+    "prepublish": "npm run test && npm run compile && npm run build"
   },
   "pre-commit": {
     "run": "test, compile, build",
