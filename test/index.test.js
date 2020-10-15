@@ -59,6 +59,6 @@ describe('MediaCarrier', () => {
     const file = new Blob([JSON.stringify({name: 'jiansheng.chen'})], { type: 'application/json'});
     const res = await mc.md5(file, { formatType: 'mp4' });
 
-    expect(res).toEqual({ md5: null, logs: [["1"]]})
+    expect(res).toEqual({ md5: null, logs: [[""]]})
   })
 })
