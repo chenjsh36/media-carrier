@@ -1,3 +1,4 @@
+export declare type IWorkerEventName = 'message' | 'error';
 export interface IWorkerEvent {
     data: {
         type: string;
@@ -7,6 +8,9 @@ export interface IWorkerEvent {
             }[];
         };
     };
+}
+export interface IWorkerEventCallback {
+    (e: MessageEvent | ErrorEvent): any;
 }
 export interface IPostInfo {
     type: string;

@@ -62,7 +62,7 @@ window.cutVideo = async () =>  {
     width: videoSize.width > 1024 ? 1024 : videoSize.width
   });
   console.log('LOGS:', clippedBlob, logs, clippedArrayBuffer, clippedArrayBuffer.byteLength, clippedArrayBuffer.length);
-  const clippedVideoUrl = await Utils.blob2ObjectURL(clippedBlob);
+  const clippedVideoUrl = Utils.blob2ObjectURL(clippedBlob);
   const clippedVideo = document.createElement('video');
   clippedVideo.src = clippedVideoUrl;
   clippedVideo.controls = true;
@@ -123,3 +123,6 @@ function calcMD5( arrayBuffer ) {
   }
   return spark.end();
 }
+
+window.calcMD5G = calcMD5;
+window.blob2ArrayBuffer = Utils.blob2ArrayBuffer;

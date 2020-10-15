@@ -1,4 +1,4 @@
-export * from './mpegWorker';
-export * from './mpegCommand';
-export * from './dataTransform';
-export * from './common';
+export * as mpegWorker from './mpegWorker';
+export * as mpegCommand from './mpegCommand';
+export * as dataTransform from './dataTransform';
+export * as common from './common';

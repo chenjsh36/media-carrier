@@ -3,15 +3,16 @@ interface ICommand {
     arguments: string[];
     MEMFS: [
         {
-            data: Uint8Array;
+            data: Uint8Array | ArrayBuffer;
             name: string;
         }
     ];
 }
-export declare function getClipCommand({ arrayBuffer, startTime, endTime, formatType }: {
+export declare function getClipCommand({ arrayBuffer, startTime, duration, endTime, formatType }: {
     arrayBuffer: ArrayBuffer;
     startTime: string;
-    endTime: string;
+    duration?: string;
+    endTime?: string;
     formatType: string;
 }): ICommand;
 export {};

@@ -1,17 +1,26 @@
 import {
+  mpegWorker,
+  mpegCommand,
+  dataTransform,
+  common,
+} from './utils';
+import { sec2Time, time2Sec } from './utils/common';
+
+const {
   createWorker,
   waitForWorkerIsReady,
   pmToPromise,
-} from './utils/mpegWorker';
-import {
-  createTimeoutPromise,
-} from './utils/common';
-import {
+} = mpegWorker;
+const {
   getClipCommand,
-} from './utils/mpegCommand';
-import * as DataTransform from './utils/dataTransform';
-
-export const Utils = DataTransform;
+} = mpegCommand;
+const {
+  blob2ArrayBuffer,
+  arrayBuffer2Blob,
+} = dataTransform;
+const {
+  createTimeoutPromise,
+} = common;
 
 interface IOutput {
   md5?: string;
@@ -21,8 +30,13 @@ interface IOutput {
 }
 
 const DEFAULT_TIMEOUT = 30 * 1000;
-
 let ID = 0;
+
+export const Utils = {
+  ...dataTransform,
+  sec2Time,
+  time2Sec,
+}
 
 export default class MediaCarrier {
   private worker: Worker;
@@ -30,7 +44,6 @@ export default class MediaCarrier {
   private id: number;
 
   constructor(conf: { timeout: number } = { timeout: DEFAULT_TIMEOUT }) {
-    console.log('new a media carrier')
     this.timeout = conf.timeout || DEFAULT_TIMEOUT;
     this.id = ID++;
   }
@@ -45,11 +58,9 @@ export default class MediaCarrier {
       return;
     }
     const { workerPath, onSuccess, onFail } = conf;
-    console.log('to create worker:', workerPath);
     const worker = createWorker(workerPath);
-    console.log('worker:', worker);
     const p1 = waitForWorkerIsReady(worker, onSuccess, onFail);
-    const p2 = createTimeoutPromise(DEFAULT_TIMEOUT);
+    const p2 = createTimeoutPromise(this.timeout);
     this.worker = worker;
     return Promise.race([p1, p2]);
   };
@@ -59,28 +70,41 @@ export default class MediaCarrier {
     this.worker = null;
   }
 
-  public clip = async( originBlob: Blob, conf: { startTime: string, endTime: string, mediaType: string, formatType: string}): Promise<IOutput> => {
-    const arrayBuffer = await DataTransform.blob2ArrayBuffer(originBlob);
-    const { startTime, endTime, mediaType, formatType } = conf;
+  /**
+   * 对媒体文件进行剪辑
+   * @param originBlob 原始 Blob 文件
+   * @param conf 剪辑参数
+   */
+  public clip = async(
+    originBlob: Blob,
+    conf: {
+      startTime: string;
+      endTime?: string;
+      duration?: string;
+      mediaType: string;
+      formatType: string;
+    }): Promise<IOutput> => 
+  {
+    const arrayBuffer = await blob2ArrayBuffer(originBlob);
+    const { startTime, endTime, duration, mediaType = 'video', formatType = 'mp4' } = conf;
+
     const command = getClipCommand({
       arrayBuffer,
       startTime,
       endTime,
-      formatType ,
-    })
-
-    console.log('clip Common:', command);
+      duration,
+      formatType,
+    });
     const result = await pmToPromise(this.worker, command, `${this.id}`);
-
     return {
       arrayBuffer: result.buffer as ArrayBuffer,
-      blob: DataTransform.arrayBuffer2Blob(result.buffer, `${mediaType}/${formatType}`),
+      blob: arrayBuffer2Blob(result.buffer, `${mediaType}/${formatType}`),
       logs: [result.logs],
     }
   }
 
   public withoutPresetClip = async ( originBlob: Blob, conf: { startTime: string, endTime: string, mediaType: string, formatType: string, width: number }): Promise<IOutput> => {
-    let arrayBuffer = await DataTransform.blob2ArrayBuffer(originBlob);
+    let arrayBuffer = await blob2ArrayBuffer(originBlob);
     const { startTime, endTime, mediaType, formatType, width = 640 } = conf;
     const command = {
       type: 'run',
@@ -93,18 +117,16 @@ export default class MediaCarrier {
       ],
       TOTAL_MEMORY: 1073741824,
     };
-    console.log('command:', command);
-    console.log('this.ID is :', this.id);
     const result = await pmToPromise(this.worker, command, `${this.id}`);
     return {
       arrayBuffer: result.buffer as ArrayBuffer,
-      blob: DataTransform.arrayBuffer2Blob(result.buffer, `${mediaType}/${formatType}`),
+      blob: arrayBuffer2Blob(result.buffer, `${mediaType}/${formatType}`),
       logs: [result.logs]
     }
   }
 
   public mediaSpaceClip = async ( originBlob: Blob, conf: { startTime: string, endTime: string, mediaType: string, formatType: string, width: number }): Promise<IOutput> => {
-    const arrayBuffer = await DataTransform.blob2ArrayBuffer(originBlob);
+    const arrayBuffer = await blob2ArrayBuffer(originBlob);
     const { startTime, endTime, mediaType, formatType, width = 640 } = conf;
     const command = {
       type: 'run',
@@ -117,30 +139,28 @@ export default class MediaCarrier {
         },
       ],
     };
-    console.log('command:', command);
-    console.log('this.ID is :', this.id);
     const result = await pmToPromise(this.worker, command, `${this.id}`);
     return {
       arrayBuffer: result.buffer as ArrayBuffer,
-      blob: DataTransform.arrayBuffer2Blob(result.buffer, `${mediaType}/${formatType}`),
+      blob: arrayBuffer2Blob(result.buffer, `${mediaType}/${formatType}`),
       logs: [result.logs]
     }
   }
 
-  public md5 = async ( originBlog: Blob, conf: { formatType: string } ): Promise<IOutput> => {
-    const arrayBuffer = await DataTransform.blob2ArrayBuffer(originBlog);
+  public md5 = async ( originBlob: Blob, conf: { formatType: string } ): Promise<IOutput> => {
+    const arrayBuffer = await blob2ArrayBuffer(originBlob);
     const { formatType = 'mp4' } = conf;
     const command = {
       type: 'run',
       arguments: `-i input.${formatType} -f hash -hash md5 output.md5`.split(' '),
       MEMFS: [
         {
-          data: new Uint8Array(arrayBuffer as any),
+          // data: new Uint8Array(arrayBuffer as any),
+          data: arrayBuffer as any,
           name: `input.${formatType}`,
         },
       ]
     };
-    console.log('command', command);
     const result = await pmToPromise(this.worker, command);
     return {
       md5: result.buffer as string,

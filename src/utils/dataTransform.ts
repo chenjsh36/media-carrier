@@ -8,7 +8,8 @@ export function arrayBuffer2Blob(arrayBuffer: any, type: string ) {
 }
 
 export function arrayBuffer2File(arrayBuffer: any, name: string, options?: { type?: string; lastModified?: number } ) {
-  const file = new File(arrayBuffer, name, options);
+  const file = new File([arrayBuffer], name, options);
+  return file;
 }
 
 export function blob2ArrayBuffer(blob: Blob): Promise<ArrayBuffer> {
@@ -25,26 +26,25 @@ export function blob2ArrayBuffer(blob: Blob): Promise<ArrayBuffer> {
 
       reject(`fileReader read blob error: ${err1} or ${err2}`);
     };
-    console.log('blob in 2 arraybuffer:', blob, blob instanceof Blob, blob instanceof ArrayBuffer);
     fileReader.readAsArrayBuffer(blob);
   });
 }
 
-export async function blob2ObjectURL(blob: Blob): Promise<string> {
+export function blob2ObjectURL(blob: Blob): string {
   const url = URL.createObjectURL(blob);
   return url;
 }
 
-export async function blob2AudioEelemnt(blob: Blob): Promise<HTMLAudioElement> {
-  const url = await blob2ObjectURL(blob);
-  return Promise.resolve(new Audio(url));
+export function blob2AudioEelemnt(blob: Blob): HTMLAudioElement {
+  const url = blob2ObjectURL(blob);
+  return new Audio(url);
 }
 
-export async function blob2VideoElement(blob: Blob): Promise<HTMLVideoElement> {
-  const url = await blob2ObjectURL(blob);
+export function blob2VideoElement(blob: Blob): HTMLVideoElement {
+  const url = blob2ObjectURL(blob);
   const video = document.createElement('video');
   video.src = url;
-  return Promise.resolve(video);
+  return video;
 }
 
 
@@ -55,15 +55,25 @@ export async function reqMedia(url: string, fileType: FileType = 'arrayBuffer' )
     url,
     method: 'get',
     responseType: 'arraybuffer',
-  }).then(async (res: any) => {
+  }).then((res: any) => {
     const arrayBuffer = res.data;
-    const contentType = res.headers['content-type'];
+    const contentType = res.headers['content-type'] || '';
     
     let ret = arrayBuffer;
 
     if (fileType === 'file') {
-      ret = arrayBuffer2File([arrayBuffer2File], 'result', { type: contentType });
+      ret = arrayBuffer2File(ret, 'result', { type: contentType });
     }
     return ret;
   })
 };
+
+export default {
+  arrayBuffer2Blob,
+  arrayBuffer2File,
+  blob2ArrayBuffer,
+  blob2AudioEelemnt,
+  blob2VideoElement,
+  blob2ObjectURL,
+  reqMedia,
+}

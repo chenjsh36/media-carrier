@@ -1,5 +1,7 @@
 import { get } from 'lodash';
+import { time2Millisecond } from './common';
 
+export type IWorkerEventName = 'message' | 'error';
 export interface IWorkerEvent {
   data: {
     type: string;
@@ -8,7 +10,9 @@ export interface IWorkerEvent {
     };
   };
 }
-
+export interface IWorkerEventCallback {
+  (e: MessageEvent | ErrorEvent): any;
+}
 export interface IPostInfo {
   type: string;
   arguments: string[];
@@ -20,18 +24,23 @@ export interface IProgressCallback {
 }
 
 export function createWorker(path: string) {
-  console.log('worker:', path);
   const worker = new Worker(path);
   return worker;
 }
 
-function __timeToMillisecond(time: string): number {
-  const [hour, minute, second] = time.split(':').map(str => parseFloat(str));
-  let millisecond = 0;
-  millisecond += second * 1000;
-  millisecond += minute * 60 * 1000;
-  millisecond += hour * 60 * 60 * 1000;
-  return millisecond;
+function addWorkerEventListener(worker: Worker, eventName: IWorkerEventName, fn: IWorkerEventCallback) {
+  if (worker.addEventListener) {
+    worker.addEventListener(eventName, fn);
+    return;
+  }
+  worker[`on${eventName}` as 'onmessage'] = fn;
+}
+function removeWorkerEventListener(worker: Worker, eventName: IWorkerEventName, fn: IWorkerEventCallback) {
+  if (worker.removeEventListener) {
+    worker.removeEventListener(eventName, fn );
+    return;
+  }
+  worker[`on${eventName}` as 'onmessage'] = null;
 }
 
 export function pmToPromiseWithProgress(
@@ -57,11 +66,11 @@ export function pmToPromiseWithProgress(
         case 'stderr':
           const msg = get(event, 'data.data', '') as string;
           if (durationReg.test(msg)) {
-            duration = __timeToMillisecond(
+            duration = time2Millisecond(
               msg.match(durationReg)[1] || '00:00:01',
             );
           } else if (currentTimeReg.test(msg)) {
-            currentTime = __timeToMillisecond(
+            currentTime = time2Millisecond(
               msg.match(currentTimeReg)[1] || '00:00:00',
             );
           }
@@ -74,23 +83,22 @@ export function pmToPromiseWithProgress(
               currentTime,
               duration,
             });
-          console.log('worker stdout: ', event.data.data);
           break;
 
         case 'start':
-          console.log('worker receive your command and start to work:)');
+          // console.log('worker receive your command and start to work:)');
           break;
 
         case 'done':
           progressCallback &&
             progressCallback({ progress: 1, currentTime, duration });
-          worker.removeEventListener('message', successHandler);
+          removeWorkerEventListener(worker, 'message', successHandler as IWorkerEventCallback);
           result.buffer = get(event, 'data.data.MEMFS.0.data', null);
           resolve(result);
           break;
 
         case 'error':
-          worker.removeEventListener('message', successHandler);
+          removeWorkerEventListener(worker, 'message', successHandler as IWorkerEventCallback)
           reject(event.data.data);
           break;
 
@@ -100,12 +108,12 @@ export function pmToPromiseWithProgress(
     };
 
     const failHandler = function(error: any) {
+      removeWorkerEventListener(worker, 'error', failHandler as IWorkerEventCallback);
       worker.removeEventListener('error', failHandler);
       reject(error);
     };
-
-    worker.addEventListener('message', successHandler);
-    worker.addEventListener('error', failHandler);
+    addWorkerEventListener(worker, 'message', successHandler as IWorkerEventCallback);
+    addWorkerEventListener(worker, 'error', failHandler as IWorkerEventCallback);
     postInfo && worker.postMessage(postInfo);
   });
 }
@@ -119,31 +127,28 @@ export function pmToPromise(
     buffer: null,
     logs: [],
   };
-  console.log('pmtopromise:', key);
 
   return new Promise((resolve, reject) => {
     const successHandler = function(event: IWorkerEvent) {
-      console.log(key, get(event, 'data.data', ''));
       result.logs.push(get(event, 'data.data', '').toString());
 
       switch (event.data.type) {
         case 'stdout':
           // case 'stderr':
-          console.log('worker stdout: ', event.data.data);
           break;
 
         case 'start':
-          console.log('worker receive your command and start to work:)');
+          // worker receive your command and start to work
           break;
 
         case 'done':
-          worker.removeEventListener('message', successHandler);
+          removeWorkerEventListener(worker, 'message', successHandler as IWorkerEventCallback);
           result.buffer = get(event, 'data.data.MEMFS.0.data', null);
           resolve(result);
           break;
 
         case 'error':
-          worker.removeEventListener('message', successHandler);
+          removeWorkerEventListener(worker, 'message', successHandler as IWorkerEventCallback);
           reject(event.data.data);
           break;
 
@@ -153,15 +158,12 @@ export function pmToPromise(
     };
 
     const failHandler = function(error: any) {
-      worker.removeEventListener('error', failHandler);
+      removeWorkerEventListener(worker, 'error', failHandler as IWorkerEventCallback);
       reject(error);
     };
-    worker.addEventListener('message', successHandler);
-    worker.addEventListener('error', failHandler);
-    // console.log('post message:', postInfo);
+    addWorkerEventListener(worker, 'message', successHandler as IWorkerEventCallback);
+    addWorkerEventListener(worker, 'error', failHandler);
     postInfo && worker.postMessage(postInfo, [postInfo.MEMFS[0].data]);
-
-    // postInfo && worker.postMessage(postInfo);
   });
 }
 
@@ -173,17 +175,17 @@ export function waitForWorkerIsReady(
   return new Promise((resolve, reject) => {
     const handleReady = function(event: IWorkerEvent) {
       if (event.data.type === 'ready') {
-        worker.removeEventListener('message', handleReady);
+        removeWorkerEventListener(worker, 'message', handleReady as IWorkerEventCallback);
         onSuccess && onSuccess();
         resolve();
       }
     };
     const handleError = (err: any) => {
-      worker.removeEventListener('error', handleError);
+      removeWorkerEventListener(worker, 'error', handleError as IWorkerEventCallback);
       onFail && onFail(err);
       reject(err);
     };
-    worker.addEventListener('message', handleReady);
-    worker.addEventListener('error', handleError);
+    addWorkerEventListener(worker, 'message', handleReady as IWorkerEventCallback);
+    addWorkerEventListener(worker, 'error', handleError as IWorkerEventCallback);
   });
 }
