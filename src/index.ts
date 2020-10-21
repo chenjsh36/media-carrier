@@ -85,6 +85,7 @@ export default class MediaCarrier {
       formatType: string;
     }): Promise<IOutput> => 
   {
+
     const arrayBuffer = await blob2ArrayBuffer(originBlob);
     const { startTime, endTime, duration, mediaType = 'video', formatType = 'mp4' } = conf;
 

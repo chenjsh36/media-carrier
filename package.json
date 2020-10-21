@@ -1,6 +1,6 @@
 {
   "name": "media-carrier",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
   "files": [
     "src",
@@ -11,6 +11,24 @@
   "module": "lib/index.js",
   "typings": "lib/index.d.ts",
   "types": "lib/index.d.ts",
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:cov": "jest --coverage",
+    "dev": "webpack --config webpack.dev.config.js --watch",
+    "compile:watch": "tsc -p tsconfig.json -w",
+    "compile": "tsc -p tsconfig.json",
+    "build": "webpack --progress --colors --config webpack.config.js",
+    "prepublish": "npm run test && npm run compile && npm run build"
+  },
+  "pre-commit": {
+    "run": "test, compile, build",
+    "silent": false,
+    "colors": true
+  },
+  "keywords": ["ffmpeg", "video"],
+  "author": "chenjsh36",
+  "license": "ISC",
   "dependencies": {
     "axios": "^0.20.0"
   },
@@ -34,23 +52,5 @@
   },
   "peerDependencies": {
     "lodash": "^4.17.20"
-  },
-  "scripts": {
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:cov": "jest --coverage",
-    "dev": "webpack --config webpack.dev.config.js --watch",
-    "compile:watch": "tsc -p tsconfig.json -w",
-    "compile": "tsc -p tsconfig.json",
-    "build": "webpack --progress --colors --config webpack.config.js",
-    "prepublish": "npm run test && npm run compile && npm run build"
-  },
-  "pre-commit": {
-    "run": "test, compile, build",
-    "silent": false,
-    "colors": true
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC"
+  }
 }

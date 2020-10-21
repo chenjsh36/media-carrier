@@ -56,7 +56,8 @@ window.cutVideo = async () =>  {
   console.log('blob:', blob);
   const { blob: clippedBlob, logs, arrayBuffer: clippedArrayBuffer } = await mc.clip(blob, {
     startTime: start,
-    endTime: end,
+    // endTime: end,
+    duration: end,
     mediaType: 'video',
     formatType: inputFileFormatType,
     width: videoSize.width > 1024 ? 1024 : videoSize.width

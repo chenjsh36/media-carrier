@@ -128,6 +128,7 @@ export function pmToPromise(
     logs: [],
   };
 
+
   return new Promise((resolve, reject) => {
     const successHandler = function(event: IWorkerEvent) {
       result.logs.push(get(event, 'data.data', '').toString());
@@ -163,6 +164,7 @@ export function pmToPromise(
     };
     addWorkerEventListener(worker, 'message', successHandler as IWorkerEventCallback);
     addWorkerEventListener(worker, 'error', failHandler);
+    // postInfo && worker.postMessage(postInfo);
     postInfo && worker.postMessage(postInfo, [postInfo.MEMFS[0].data]);
   });
 }
