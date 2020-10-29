@@ -1,4 +1,4 @@
-const common = require('../../src/utils/common');
+const common = require('../../src/utils/time');
 
 const { sec2Time, time2Sec, time2Millisecond, padStart, timeout, createTimeoutPromise } = common;
 
