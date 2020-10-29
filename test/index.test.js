@@ -16,7 +16,7 @@ describe('MediaCarrier', () => {
     expect(mc).toHaveProperty('open');
     expect(mc).toHaveProperty('close');
     expect(mc).toHaveProperty('clip');
-    expect(mc).toHaveProperty('withoutPresetClip');
+    expect(mc).toHaveProperty('clipAndResize');
     expect(mc).toHaveProperty('mediaSpaceClip');
     expect(mc).toHaveProperty('md5');
   })
@@ -59,6 +59,6 @@ describe('MediaCarrier', () => {
     const file = new Blob([JSON.stringify({name: 'jiansheng.chen'})], { type: 'application/json'});
     const res = await mc.md5(file, { formatType: 'mp4' });
 
-    expect(res).toEqual({ md5: null, logs: [[""]]})
+    expect(res).toEqual({ md5: '25771370f007598591578a773d8f6a67', logs: []})
   })
 })

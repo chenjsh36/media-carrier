@@ -5,6 +5,6 @@ describe('utils', () => {
     expect(utils).toHaveProperty('mpegWorker');
     expect(utils).toHaveProperty('mpegCommand');
     expect(utils).toHaveProperty('dataTransform');
-    expect(utils).toHaveProperty('common');
+    expect(utils).toHaveProperty('time');
   })
 })

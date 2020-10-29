@@ -1,4 +1,4 @@
-import { dataTransform, common } from './utils';
+import { dataTransform, time, md5 } from './utils';
 interface IOutput {
     md5?: string;
     arrayBuffer?: ArrayBuffer;
@@ -6,8 +6,9 @@ interface IOutput {
     logs: string[][];
 }
 export declare const Utils: {
-    sec2Time: typeof common.sec2Time;
-    time2Sec: typeof common.time2Sec;
+    sec2Time: typeof time.sec2Time;
+    time2Sec: typeof time.time2Sec;
+    calcMD5: typeof md5.calcMD5;
     arrayBuffer2Blob(arrayBuffer: any, type: string): Blob;
     arrayBuffer2File(arrayBuffer: any, name: string, options?: {
         type?: string;
@@ -53,22 +54,44 @@ export default class MediaCarrier {
         mediaType: string;
         formatType: string;
     }) => Promise<IOutput>;
-    withoutPresetClip: (originBlob: Blob, conf: {
+    /**
+     * 计算文件的 MD5 值
+     * @param originBlob
+     * @param conf
+     */
+    md5: (originBlob: Blob) => Promise<IOutput>;
+    /**
+     * 自定义 FFmpeg 命令执行
+     * @param originBlob
+     * @param conf
+     */
+    runCommands: (originBlob: Blob, conf: {
+        formatType: string;
+        args: string[];
+    }) => Promise<IOutput>;
+    /**
+     * 剪辑 + 调整视频大小, 内部测试使用
+     * @param originBlob 原视视频
+     * @param conf
+     */
+    clipAndResize: (originBlob: Blob, conf: {
         startTime: string;
         endTime: string;
         mediaType: string;
         formatType: string;
         width: number;
     }) => Promise<IOutput>;
+    /**
+     * 剪辑 + 改变大小 + 压缩，内部测试使用
+     * @param originBlob
+     * @param conf
+     */
     mediaSpaceClip: (originBlob: Blob, conf: {
         startTime: string;
         endTime: string;
         mediaType: string;
         formatType: string;
         width: number;
-    }) => Promise<IOutput>;
-    md5: (originBlob: Blob, conf: {
-        formatType: string;
     }) => Promise<IOutput>;
 }
 export {};

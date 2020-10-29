@@ -1,5 +1,5 @@
 import { get } from 'lodash';
-import { time2Millisecond } from './common';
+import { time2Millisecond } from './time';
 
 export type IWorkerEventName = 'message' | 'error';
 export interface IWorkerEvent {

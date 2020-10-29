@@ -2,9 +2,9 @@ import {
   mpegWorker,
   mpegCommand,
   dataTransform,
-  common,
+  time,
+  md5,
 } from './utils';
-import { sec2Time, time2Sec } from './utils/common';
 
 const {
   createWorker,
@@ -20,7 +20,12 @@ const {
 } = dataTransform;
 const {
   createTimeoutPromise,
-} = common;
+  sec2Time,
+  time2Sec,
+} = time;
+const {
+  calcMD5,
+} = md5;
 
 interface IOutput {
   md5?: string;
@@ -36,6 +41,7 @@ export const Utils = {
   ...dataTransform,
   sec2Time,
   time2Sec,
+  calcMD5,
 }
 
 export default class MediaCarrier {
@@ -85,7 +91,6 @@ export default class MediaCarrier {
       formatType: string;
     }): Promise<IOutput> => 
   {
-
     const arrayBuffer = await blob2ArrayBuffer(originBlob);
     const { startTime, endTime, duration, mediaType = 'video', formatType = 'mp4' } = conf;
 
@@ -104,7 +109,53 @@ export default class MediaCarrier {
     }
   }
 
-  public withoutPresetClip = async ( originBlob: Blob, conf: { startTime: string, endTime: string, mediaType: string, formatType: string, width: number }): Promise<IOutput> => {
+  /**
+   * 计算文件的 MD5 值
+   * @param originBlob 
+   * @param conf 
+   */
+  public md5 = async ( originBlob: Blob ): Promise<IOutput> => {
+    const arrayBuffer = await blob2ArrayBuffer(originBlob);
+    const md5Val = await calcMD5(arrayBuffer);
+    return {
+      md5: md5Val,
+      logs: [],
+    };
+  }
+
+  /**
+   * 自定义 FFmpeg 命令执行
+   * @param originBlob 
+   * @param conf 
+   */
+  public runCommands = async ( originBlob: Blob, conf: { formatType: string, args: string[] }): Promise<IOutput> => {
+    const arrayBuffer = await blob2ArrayBuffer(originBlob);
+    const { formatType = 'mp4', args = [] } = conf;
+    const command = {
+      type: 'run',
+      arguments: args,
+      MEMFS: [
+        {
+          // data: new Uint8Array(arrayBuffer as any),
+          data: arrayBuffer as any,
+          name: `input.${formatType}`,
+        },
+      ]
+    };
+    const result = await pmToPromise(this.worker, command);
+    return {
+      md5: result.buffer as string,
+      logs: [result.logs],
+    } 
+  }
+
+
+  /**
+   * 剪辑 + 调整视频大小, 内部测试使用
+   * @param originBlob 原视视频
+   * @param conf 
+   */
+  public clipAndResize = async ( originBlob: Blob, conf: { startTime: string, endTime: string, mediaType: string, formatType: string, width: number }): Promise<IOutput> => {
     let arrayBuffer = await blob2ArrayBuffer(originBlob);
     const { startTime, endTime, mediaType, formatType, width = 640 } = conf;
     const command = {
@@ -126,6 +177,11 @@ export default class MediaCarrier {
     }
   }
 
+  /**
+   * 剪辑 + 改变大小 + 压缩，内部测试使用
+   * @param originBlob 
+   * @param conf 
+   */
   public mediaSpaceClip = async ( originBlob: Blob, conf: { startTime: string, endTime: string, mediaType: string, formatType: string, width: number }): Promise<IOutput> => {
     const arrayBuffer = await blob2ArrayBuffer(originBlob);
     const { startTime, endTime, mediaType, formatType, width = 640 } = conf;
@@ -145,27 +201,6 @@ export default class MediaCarrier {
       arrayBuffer: result.buffer as ArrayBuffer,
       blob: arrayBuffer2Blob(result.buffer, `${mediaType}/${formatType}`),
       logs: [result.logs]
-    }
-  }
-
-  public md5 = async ( originBlob: Blob, conf: { formatType: string } ): Promise<IOutput> => {
-    const arrayBuffer = await blob2ArrayBuffer(originBlob);
-    const { formatType = 'mp4' } = conf;
-    const command = {
-      type: 'run',
-      arguments: `-i input.${formatType} -f hash -hash md5 output.md5`.split(' '),
-      MEMFS: [
-        {
-          // data: new Uint8Array(arrayBuffer as any),
-          data: arrayBuffer as any,
-          name: `input.${formatType}`,
-        },
-      ]
-    };
-    const result = await pmToPromise(this.worker, command);
-    return {
-      md5: result.buffer as string,
-      logs: [result.logs],
     }
   }
 }

@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import SparkMD5 from 'spark-md5';
 import MediaCarrier, { Utils } from 'media-carrier';
 
 let inputFileFormatType = 'mp4';
@@ -33,11 +32,7 @@ window.readVideo = async () =>  {
     resolve(input.files[0])
   })
 }
-window.cutMulVideo = async() => {
-  for (let i = 0; i < 100; i++) {
-    cutVideo();
-  }
-}
+
 window.cutVideo = async () =>  {
   const mc = new MediaCarrier();
 
@@ -51,12 +46,10 @@ window.cutVideo = async () =>  {
   const startInput = document.querySelector('#cut-video-start-input');
   const endInput = document.querySelector('#cut-video-end-input');
   const start = startInput.value || '00:00:00.0';
-  const end = endInput.value || '10';
+  const end = endInput.value || '00:00:10.0';
   const beginTime = Date.now();
-  console.log('blob:', blob);
   const { blob: clippedBlob, logs, arrayBuffer: clippedArrayBuffer } = await mc.clip(blob, {
     startTime: start,
-    // endTime: end,
     duration: end,
     mediaType: 'video',
     formatType: inputFileFormatType,
@@ -79,13 +72,6 @@ window.cutVideo = async () =>  {
 
   const afterText = document.createTextNode(`原始视频（${videoSize.width} x ${videoSize.height}）经过 ${duration} s 处理后的视频(大小：${(clippedBlob.size / 1000 / 1000).toFixed(2)}MB):`);
 
-  // const md5BeginTime = Date.now();
-  // const md5Value = calcMD5(clippedArrayBuffer);
-  // const md5Duration = (Date.now() - md5BeginTime) / 1000;
-  // const md5Text = document.createTextNode(`经过${md5Duration} s 计算出 MD5 值为 ${md5Value}`)
-  // template.appendChild(md5Text);
-
-
   template.appendChild(afterText);
   template.appendChild(clippedVideo);
   template.appendChild(slippedLink);
@@ -96,34 +82,10 @@ window.cutVideo = async () =>  {
 
 window.calcVideoMD5 = async () => {
   const mc = new MediaCarrier();
-
-  await mc.open({
-    workerPath: '/static/ffmpeg-worker-mp4.js',
-    mediaType: inputFileFormatType,
-  });
-
   const blob = await readVideo();
-
-  const arrayBuffer = await Utils.blob2ArrayBuffer(blob);
-  const md5Value = calcMD5(arrayBuffer);
+  const md5Value = await mc.md5(blob);
   console.log('MD5:', md5Value);
 }
 
-function calcMD5( arrayBuffer ) {
-  const cSize = 2097152; // 2 MB
-  const fSize = arrayBuffer.byteLength;
-  const chunks = Math.ceil(fSize / cSize);
-
-  const spark = new SparkMD5.ArrayBuffer();
-
-  for (let i = 0; i < chunks; i++) {
-    let start = i * cSize;
-    let end = (start + cSize) >= fSize ? fSize : start + cSize;
-    let sliceBuffer = arrayBuffer.slice(start, end);
-    spark.append(sliceBuffer);
-  }
-  return spark.end();
-}
-
-window.calcMD5G = calcMD5;
+window.calcMD5G = Utils.calcMD5;
 window.blob2ArrayBuffer = Utils.blob2ArrayBuffer;

@@ -7,14 +7,13 @@
     <div class="root">
       <div class="cut-video">
         <div>
-          <input id="cut-video-input" type="file" onChange="handleFileChange()"/>
+          <input id="cut-video-input" type="file" onChange="handleFileChange()" placeholder="请选择视频"/>
         </div>
-        <span>原始视频: </span>
         <video style="width: 640px" id="cut-video-before-show" controls src=""></video>
         <h3>视频剪辑：</h3>
         <div>
           <input type="text" id="cut-video-start-input" placeholder="开始时间"/>
-          <input type="text" id="cut-video-end-input" placeholder="结束时间"/>
+          <input type="text" id="cut-video-end-input" placeholder="时长"/>
         </div>
         <div>
           <button onClick="cutVideo()"> 点击剪辑</button>
