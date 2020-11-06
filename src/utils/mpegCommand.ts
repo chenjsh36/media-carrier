@@ -6,7 +6,8 @@ interface ICommand {
       data: Uint8Array | ArrayBuffer;
       name: string;
     }
-  ]
+  ],
+  TOTAL_MEMORY?: number;
 }
 
 export function getClipCommand({ arrayBuffer, startTime, duration, endTime, formatType }: {

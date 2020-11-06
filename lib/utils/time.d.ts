@@ -23,3 +23,4 @@ export declare function time2Millisecond(time: string): number;
  * @param isFreezeLen
  */
 export declare function padStart(str?: string, len?: number, val?: string, isFreezeLen?: boolean): string;
+export declare function getVideoDuration(video: File): Promise<number>;

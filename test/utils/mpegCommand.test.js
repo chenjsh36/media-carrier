@@ -4,7 +4,6 @@ const { getClipCommand } = mpegCommand;
 
 describe('getClipCommand', () => {
   it('test getClipCommand with start|end time', () => {
-    // todo
     const startTime = '00:00:01.0';
     const endTime = '00:00:10.0';
     const formatType = 'mp4';

@@ -22,6 +22,7 @@ const {
   createTimeoutPromise,
   sec2Time,
   time2Sec,
+  getVideoDuration,
 } = time;
 const {
   calcMD5,
@@ -42,6 +43,7 @@ export const Utils = {
   sec2Time,
   time2Sec,
   calcMD5,
+  getVideoDuration,
 }
 
 export default class MediaCarrier {

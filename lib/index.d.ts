@@ -9,6 +9,7 @@ export declare const Utils: {
     sec2Time: typeof time.sec2Time;
     time2Sec: typeof time.time2Sec;
     calcMD5: typeof md5.calcMD5;
+    getVideoDuration: typeof time.getVideoDuration;
     arrayBuffer2Blob(arrayBuffer: any, type: string): Blob;
     arrayBuffer2File(arrayBuffer: any, name: string, options?: {
         type?: string;

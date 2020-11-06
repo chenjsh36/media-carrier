@@ -1,6 +1,6 @@
 const common = require('../../src/utils/time');
 
-const { sec2Time, time2Sec, time2Millisecond, padStart, timeout, createTimeoutPromise } = common;
+const { sec2Time, time2Sec, time2Millisecond, padStart, timeout, createTimeoutPromise, getVideoDuration } = common;
 
 test('sec2Time', () => {
   expect(() => sec2Time(-1)).toThrowError(new Error('"secs" should be positive integer'))
@@ -50,4 +50,10 @@ it('createTimeoutPromise', async () => {
   expect.assertions(1);
   const time  = 1000;
   await expect(createTimeoutPromise(time)).resolves.toEqual(undefined);
+})
+
+it('getVideoDuration', async () => {
+  expect(typeof getVideoDuration).toBe('function');
+
+
 })

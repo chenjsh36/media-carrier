@@ -88,3 +88,19 @@ const { blob, logs } = await mc.runCommands(file, {
 
 ### Utils.time2Sec
 
+### Utils.getVideoDuration
+
+## run demo
+
+```
+npm run compile:watch
+npm run dev
+npm link
+```
+
+Go to demo 
+
+```
+npm link media-carrier
+npm run start
+```

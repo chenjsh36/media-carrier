@@ -7,6 +7,20 @@ let videoSize = {
   height: 0,
 }
 
+function getVideoDuration(video) {
+  return new Promise((resolve) => {
+    let videoElement = document.createElement('video');
+    videoElement.preload = 'metadata';
+    videoElement.addEventListener('loadedmetadata', () => {
+      window.URL.revokeObjectURL(videoElement.src);
+      const duration = videoElement.duration;
+      videoElement = null;
+      resolve(duration);
+    })
+    videoElement.src = window.URL.createObjectURL(video);
+  })
+}
+
 const video = document.querySelector('#cut-video-before-show');
 video.addEventListener('loadedmetadata', function(e) {
   console.log('video length:', video, e, video.videoHeight, video.videoWidth);
@@ -70,7 +84,9 @@ window.cutVideo = async () =>  {
   const span = document.querySelector('#cut-video-doing-text');
   const template = document.createDocumentFragment();
 
-  const afterText = document.createTextNode(`原始视频（${videoSize.width} x ${videoSize.height}）经过 ${duration} s 处理后的视频(大小：${(clippedBlob.size / 1000 / 1000).toFixed(2)}MB):`);
+  const clippedBlobDuration = await getVideoDuration(clippedBlob);
+
+  const afterText = document.createTextNode(`原始视频（${videoSize.width} x ${videoSize.height}）经过 ${duration} s 处理后的视频(大小：${(clippedBlob.size / 1000 / 1000).toFixed(2)}MB), 真实时长： ${clippedBlobDuration}:`);
 
   template.appendChild(afterText);
   template.appendChild(clippedVideo);
@@ -89,3 +105,18 @@ window.calcVideoMD5 = async () => {
 
 window.calcMD5G = Utils.calcMD5;
 window.blob2ArrayBuffer = Utils.blob2ArrayBuffer;
+
+
+window.runCommand = async () => {
+  console.log('run command', Date.now());
+  const mc = new MediaCarrier();
+
+  await mc.open({
+    workerPath: '/static/ffmpeg-worker-mp4.js',
+    mediaType: inputFileFormatType,
+  });
+
+  const blob = await readVideo();
+  const result = await mc.runCommands(blob, { formatType: 'mp4', args: ['-i', 'input.mp4']})
+  console.log('result:', result, Date.now());
+}

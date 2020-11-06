@@ -60,3 +60,17 @@ export function padStart(str: string = '', len: number = 2, val: string = '0', i
   }
   return (Array(len).join(val) + str).slice(-len);
 }
+
+export function getVideoDuration(video: File): Promise<number> {
+  return new Promise((resolve) => {
+    let videoElement = document.createElement('video');
+    videoElement.preload = 'metadata';
+    videoElement.addEventListener('loadedmetadata', () => {
+      window.URL.revokeObjectURL(videoElement.src);
+      const duration = videoElement.duration;
+      videoElement = null;
+      resolve(duration);
+    })
+    videoElement.src = window.URL.createObjectURL(video);
+  })
+}
